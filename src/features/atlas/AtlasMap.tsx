@@ -106,6 +106,18 @@ export function AtlasMap({
 	const origin = { x: left + width / 2 + pan.x, y: top + height / 2 + pan.y };
 	const center = selected ?? bounds;
 
+	const categoryColors = useMemo(
+		() => new Map(categories.map((category) => [category.id, category.color])),
+		[categories],
+	);
+	const labelOrder = useMemo(
+		() =>
+			[...categories].sort(
+				(a, b) => b.count - a.count || a.id.localeCompare(b.id),
+			),
+		[categories],
+	);
+
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		const ctx = canvas?.getContext("2d");
@@ -127,9 +139,6 @@ export function AtlasMap({
 				ctx.arc(x, y, 0.8, 0, Math.PI * 2);
 				ctx.fill();
 			}
-		const colors = new Map(
-			categories.map((category) => [category.id, category.color]),
-		);
 		const positions = new Map<string, Point>();
 		for (const card of cards)
 			positions.set(card.id, {
@@ -166,7 +175,7 @@ export function AtlasMap({
 				continue;
 			const active = selected?.id === card.id;
 			const highlighted = active || hovered === card.id;
-			const color = colors.get(card.analysis.categories[0]) ?? accent;
+			const color = categoryColors.get(card.analysis.categories[0]) ?? accent;
 			if (highlighted) {
 				ctx.beginPath();
 				ctx.arc(point.x, point.y, 16, 0, Math.PI * 2);
@@ -190,10 +199,38 @@ export function AtlasMap({
 		ctx.textAlign = "center";
 		ctx.lineWidth = 5;
 		ctx.strokeStyle = background;
-		for (const category of categories) {
-			if (group && category.id !== group) continue;
+		const labels: {
+			left: number;
+			right: number;
+			top: number;
+			bottom: number;
+		}[] = [];
+		for (const category of labelOrder) {
+			if (!category.count || (group && category.id !== group)) continue;
 			const x = origin.x + (category.x - center.x) * scale;
 			const y = origin.y + (category.y - center.y) * scale - 24;
+			const halfWidth = ctx.measureText(category.name).width / 2 + 8;
+			const label = {
+				left: x - halfWidth,
+				right: x + halfWidth,
+				top: y - 18,
+				bottom: y + 6,
+			};
+			if (
+				label.left < 8 ||
+				label.right > size.width - 8 ||
+				label.top < 8 ||
+				label.bottom > size.height - 8 ||
+				labels.some(
+					(other) =>
+						label.left < other.right &&
+						label.right > other.left &&
+						label.top < other.bottom &&
+						label.bottom > other.top,
+				)
+			)
+				continue;
+			labels.push(label);
 			ctx.strokeText(category.name, x, y);
 			ctx.fillStyle = muted;
 			ctx.fillText(category.name, x, y);
@@ -223,7 +260,8 @@ export function AtlasMap({
 		}
 	}, [
 		cards,
-		categories,
+		categoryColors,
+		labelOrder,
 		selected,
 		hovered,
 		group,

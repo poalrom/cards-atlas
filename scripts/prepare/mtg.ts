@@ -14,6 +14,7 @@ import {
 	DATA,
 	date,
 	download,
+	hash,
 	object,
 	strings,
 	text,
@@ -25,6 +26,32 @@ export function windowStart(asOf: string): string {
 	const [year, month, day] = asOf.split("-").map(Number);
 	const lastDay = new Date(Date.UTC(year - 1, month, 0)).getUTCDate();
 	return `${year - 1}-${String(month).padStart(2, "0")}-${String(Math.min(day, lastDay)).padStart(2, "0")}`;
+}
+
+const backImageLayouts: Record<string, true> = {
+	transform: true,
+	modal_dfc: true,
+	reversible_card: true,
+};
+
+function artworkUrl(
+	id: unknown,
+	side: unknown,
+	layout: unknown,
+): string | undefined {
+	if (
+		typeof id !== "string" ||
+		!/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(id)
+	)
+		return undefined;
+	const printing = id.toLowerCase();
+	const face =
+		side === "b" &&
+		typeof layout === "string" &&
+		Object.hasOwn(backImageLayouts, layout)
+			? "back"
+			: "front";
+	return `https://cards.scryfall.io/normal/${face}/${printing[0]}/${printing[1]}/${printing}.jpg`;
 }
 
 // Stream one complete set at a time: AllPrintings exceeds V8's maximum JSON string size.
@@ -180,24 +207,32 @@ export class MtgNormalizer {
 					String(a.card.uuid).localeCompare(String(b.card.uuid)),
 			);
 			const latest = candidates[0].card;
-			const faces = new Map<string, CardFace>();
+			const faces = new Map<string, { side: string; face: CardFace }>();
 			const printings = new Map<string, Printing>();
 			for (const { card, setCode, setName, releasedAt } of candidates) {
+				const identifiers = object(card.identifiers, "identifiers");
+				const image = artworkUrl(
+					identifiers.scryfallId,
+					card.side,
+					card.layout,
+				);
 				const name = text(card.faceName ?? card.name, "face name");
 				const side = typeof card.side === "string" ? card.side : "";
-				// A reversible card may reuse one oracle ID for two different gameplay identities.
-				// Keep every distinct named face, never only the first record of an oracle group.
-				const faceKey = `${side}:${name}`;
-				if (!faces.has(faceKey))
-					faces.set(faceKey, {
-						name,
-						type: text(card.type, "card type"),
-						text: text(card.text ?? "", "rules text", true),
-						cost: text(card.manaCost ?? "", "mana cost", true),
-						attributes: gameplayAttributes(card),
-						...(typeof card.artist === "string" ? { artist: card.artist } : {}),
-					});
-				const identifiers = object(card.identifiers, "identifiers");
+				const face: CardFace = {
+					name,
+					type: text(card.type, "card type"),
+					text: text(card.text ?? "", "rules text", true),
+					cost: text(card.manaCost ?? "", "mana cost", true),
+					attributes: gameplayAttributes(card),
+				};
+				// Physical side and alternate art do not create another gameplay face.
+				// Distinct names or gameplay text/stats still retain every real face.
+				const faceKey = hash(face);
+				if (!faces.has(faceKey)) {
+					if (typeof card.artist === "string") face.artist = card.artist;
+					if (image) face.image = image;
+					faces.set(faceKey, { side, face });
+				}
 				const id = text(card.uuid, "printing UUID");
 				printings.set(id, {
 					id,
@@ -205,6 +240,7 @@ export class MtgNormalizer {
 					setName,
 					number: text(card.number, "collector number"),
 					releasedAt,
+					...(image ? { image } : {}),
 					...(typeof identifiers.scryfallId === "string"
 						? {
 								sourceUrl: `https://scryfall.com/card/${identifiers.scryfallId}`,
@@ -212,15 +248,16 @@ export class MtgNormalizer {
 						: {}),
 				});
 			}
-			const orderedFaces = [...faces]
-				.sort(([a], [b]) => a.localeCompare(b))
-				.map(([, face]) => face);
+			const orderedFaces = [...faces.values()]
+				.sort(
+					(a, b) =>
+						a.side.localeCompare(b.side) ||
+						a.face.name.localeCompare(b.face.name),
+				)
+				.map(({ face }) => face);
 			cards.push({
 				id: `mtg:${oracle}`,
-				name:
-					orderedFaces.length > 1
-						? orderedFaces.map((face) => face.name).join(" // ")
-						: text(latest.name, "card name"),
+				name: orderedFaces.map((face) => face.name).join(" // "),
 				type: [...new Set(orderedFaces.map((face) => face.type))].join(" // "),
 				text: orderedFaces.map((face) => face.text).join("\n//\n"),
 				cost: orderedFaces.map((face) => face.cost).join(" // "),

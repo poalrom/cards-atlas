@@ -4,9 +4,11 @@
 
 [MTGJSON AllPrintings](https://mtgjson.com/downloads/all-files/) is the source for paper printings and English Oracle text. The importer reads the complete compressed [AllPrintings document](https://mtgjson.com/api/v5/AllPrintings.json.gz), including older sets that can contain recent individually dated reprints.
 
-Eligibility is checked per physical printing: `originalReleaseDate ?? set.releaseDate`, within the last 12 calendar months through the snapshot date, inclusive. Future printings and non-paper records are excluded. A foreign-language physical reprint still establishes eligibility; the interface uses its English Oracle fields. Oracle identities group gameplay cards; all source faces and eligible printing metadata are retained.
+Eligibility is checked per physical printing: `originalReleaseDate ?? set.releaseDate`, within the last 12 calendar months through the snapshot date, inclusive. Future printings and non-paper records are excluded. A foreign-language physical reprint still establishes eligibility; the interface uses its English Oracle fields. Oracle identities group gameplay cards. Every distinct gameplay face is retained; identical rules/stats on alternate physical sides or artwork do not become duplicate gameplay faces. All eligible source printing records remain available.
 
 MTGJSON is an independent aggregator, not a Wizards of the Coast service. See its [license](https://mtgjson.com/license/). Magic: The Gathering content belongs to Wizards of the Coast. Similarity and AI summaries do not replace official rules.
+
+Artwork links use the Scryfall printing IDs supplied by MTGJSON and the [Scryfall image CDN](https://scryfall.com/docs/api/images). Transform, modal double-faced and reversible-card backs use back-face images; split, adventure and flip faces share the physical front image. These are stored image URLs, not live browser catalog/API lookups. A live front-image request was verified against its printed card name; image availability is not guaranteed, and unavailable art leaves the original rules readable.
 
 ## Riftbound: registered public release
 

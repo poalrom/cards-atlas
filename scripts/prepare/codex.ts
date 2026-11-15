@@ -227,7 +227,6 @@ export async function preflight(): Promise<UsageProof> {
 	return await promise;
 }
 export interface GenerationSession {
-	startedAt: number;
 	attestedAt: string;
 }
 export function session(
@@ -238,14 +237,12 @@ export function session(
 	if (
 		attestation !== ATTESTATION ||
 		!Number.isFinite(timestamp) ||
-		Date.now() - timestamp < -60_000 ||
-		Date.now() - timestamp > 10 * 60_000
+		timestamp > Date.now() + 60_000
 	)
 		throw new Error(
-			`Fresh included-only attestation required for this generation session. First check https://chatgpt.com/codex/settings/usage and disable automatic credit purchase. Then pass --attest-included-only '${ATTESTATION}' --attested-at <current ISO timestamp>, within 10 minutes. CLI quota guards cannot enforce account billing or auto-purchase settings.`,
+			`Included-only human attestation and its verification timestamp are required. First check https://chatgpt.com/codex/settings/usage and disable automatic credit purchase. Then pass --attest-included-only '${ATTESTATION}' --attested-at <verification ISO timestamp>. CLI quota guards cannot enforce account billing or auto-purchase settings.`,
 		);
 	return {
-		startedAt: Date.now(),
 		attestedAt: new Date(timestamp).toISOString(),
 	};
 }
@@ -255,9 +252,10 @@ export async function infer(
 	generation: GenerationSession,
 	maximumBytes: number,
 ): Promise<unknown> {
-	if (Date.now() - generation.startedAt > 4 * 60 * 60_000)
+	const verifiedAt = Date.parse(generation.attestedAt);
+	if (!Number.isFinite(verifiedAt) || verifiedAt > Date.now() + 60_000)
 		throw new Error(
-			"Generation session expired after four hours; verify billing settings again and start a new explicitly attested session",
+			"Generation requires a valid recorded human verification timestamp.",
 		);
 	await preflight(); // A fresh account guard before EVERY taxonomy/classification inference.
 	const directory = await mkdtemp(join(tmpdir(), "cards-atlas-codex-"));

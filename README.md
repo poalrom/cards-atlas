@@ -80,7 +80,7 @@ $verifiedAt = (Get-Date).ToUniversalTime().ToString("o")
 npm run catalog:analyze -- riftbound --batch-size 24 --attest-included-only $attestation --attested-at $verifiedAt
 ```
 
-Repeat with `mtg` and a fresh verification timestamp. A session's attestation must be at most ten minutes old when starting; the session expires after four hours.
+Repeat with `mtg` after verifying the same account settings. Record the actual human verification time, not a fabricated fresh timestamp when resuming. Preparation is bounded by the complete catalog and rechecks actual included usage before every inference; an arbitrary wall-clock expiry does not replace those account checks. Verify billing settings again if the account or its configuration changes.
 
 Each game gets one LLM-generated vocabulary of functional categories and canonical actions, targets, conditions, modes and keywords. Every card is analyzed against that vocabulary, including all faces and source attributes. Machine summaries are interpretations; the original rules take precedence.
 
@@ -106,7 +106,9 @@ Structured actions, target/condition/mode interactions, keywords and overlapping
 
 Neighbors use semantic cosine scores with bounded, deterministic candidate retrieval. They are approximate exploration results, **not** equivalence, target-coverage proof, legality or a power ranking. Details show shared features and original rules for both cards.
 
-The map supports mouse/touch pan, pinch/button zoom and keyboard navigation. Search includes all imported names, faces, rules, types, statistics and tags. The accessible card list provides another route to every card. Details and similar cards use one responsive, independently scrolling panel.
+Canonical category, keyword, target and condition labels are sets: repeated valid labels are normalized, while unknown labels and oversized responses are rejected. Distinct effect clauses retain their original order and multiplicity, even when different numeric thresholds map to the same canonical tuple. Original rules and gameplay attributes remain the authority for exact quantities.
+
+The map supports mouse/touch pan, pinch/button zoom and keyboard navigation. Overview labels avoid collisions and prioritize populated categories; the browser panel always exposes the full category list. Search includes all imported names, faces, rules, types, statistics and tags. The accessible card list provides another route to every card. Details and similar cards use one responsive, independently scrolling panel.
 
 ## Design and engineering rules
 
@@ -130,6 +132,6 @@ The last command builds locally, verifies the complete snapshots, publishes `dis
 
 ## Attribution
 
-Magic: The Gathering content and symbols © Wizards of the Coast. Existing self-hosted mana symbols retain their [source credits](public/symbols/credits.json). Unknown symbols remain readable original text rather than broken images. Source artists and original image links are retained where provided.
+Magic: The Gathering content and symbols © Wizards of the Coast. Existing self-hosted mana symbols retain their [source credits](public/symbols/credits.json). Unknown symbols remain readable original text rather than broken images. Card artwork is loaded from the [Scryfall image CDN](https://scryfall.com/docs/api/images) using MTGJSON printing identifiers, without a browser catalog lookup. Source artists and original image links are retained where provided.
 
 Cards Atlas was created under Riot Games' “Legal Jibber Jabber” policy using assets owned by Riot Games. Riot Games does not endorse or sponsor this project.

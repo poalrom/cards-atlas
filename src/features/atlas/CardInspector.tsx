@@ -55,6 +55,9 @@ export function OriginalFaces({
 							))}
 						</dl>
 					)}
+					{face.artist && (
+						<p className="a-muted">Illustration: {face.artist}</p>
+					)}
 				</section>
 			))}
 			{cardAttributes.length > 0 && (

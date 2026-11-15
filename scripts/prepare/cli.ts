@@ -32,7 +32,7 @@ Options:
                          the private .data/local-site/data destination and cannot be published.
   --batch-size N          1–24 cards, default 12; also bounded by full input byte size.
   --attest-included-only  Exact human attestation string below (analyze/run only).
-  --attested-at ISO       Human verification timestamp, at most 10 minutes before session start.
+  --attested-at ISO       Timestamp of the owner's included-only billing verification.
   --reason TEXT          Truthful unavailable explanation (unavailable command only).
 
 MTG uses comprehensive MTGJSON AllPrintings, not a set-date shortcut. All paper printing
