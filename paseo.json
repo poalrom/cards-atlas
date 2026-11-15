@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "prototype": {
+      "type": "service",
+      "command": "npm run prototype"
+    }
+  }
+}
