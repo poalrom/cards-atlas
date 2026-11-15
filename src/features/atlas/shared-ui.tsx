@@ -13,7 +13,7 @@ const symbolLabels: Record<string, string> = {
 };
 
 export function featureName(value: string): string {
-	const label = value.replaceAll("-", " ");
+	const label = value.replace(/([a-z])([A-Z])/g, "$1 $2").replaceAll("-", " ");
 	return label.charAt(0).toUpperCase() + label.slice(1);
 }
 

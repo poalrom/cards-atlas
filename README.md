@@ -23,6 +23,8 @@ npm run dev:local
 
 This development-only mode serves data from ignored **`.data/local-site/data/`** while retaining the same interface and URL. It is deliberately unavailable for production builds. Run only one development server on port 3010.
 
+The complete local evaluation dated **2026-11-15** contains **1,103 Riftbound cards / 1,408 source printing records / 17 categories** and **5,510 MTG cards / 9,444 source printing records / 16 categories**. Both catalogs have complete Luna Low analysis and prepared neighbors/coordinates. Generated data remains private and ignored; these snapshots are not shipped in the repository or published to Pages.
+
 ```sh
 npm run typecheck
 npm run check
@@ -82,7 +84,7 @@ npm run catalog:analyze -- riftbound --batch-size 24 --attest-included-only $att
 
 Repeat with `mtg` after verifying the same account settings. Record the actual human verification time, not a fabricated fresh timestamp when resuming. Preparation is bounded by the complete catalog and rechecks actual included usage before every inference; an arbitrary wall-clock expiry does not replace those account checks. Verify billing settings again if the account or its configuration changes.
 
-Each game gets one LLM-generated vocabulary of functional categories and canonical actions, targets, conditions, modes and keywords. Every card is analyzed against that vocabulary, including all faces and source attributes. Machine summaries are interpretations; the original rules take precedence.
+Each game gets one LLM-generated vocabulary of functional categories and canonical actions, targets, conditions, modes and keywords. Every card is analyzed against that vocabulary, including all faces and source attributes. Schema validation proves complete, bounded, internally consistent output, not semantic correctness. Summaries and mechanic labels are machine interpretations; the original rules take precedence.
 
 Validated taxonomy and batches are cached by input, taxonomy, prompt and model hashes. Resume with the **same snapshot date and batch size** to reuse good work. Invalid outputs stop processing; they do not become a partial published catalog.
 

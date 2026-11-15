@@ -10,6 +10,10 @@ MTGJSON is an independent aggregator, not a Wizards of the Coast service. See it
 
 Artwork links use the Scryfall printing IDs supplied by MTGJSON and the [Scryfall image CDN](https://scryfall.com/docs/api/images). Transform, modal double-faced and reversible-card backs use back-face images; split, adventure and flip faces share the physical front image. These are stored image URLs, not live browser catalog/API lookups. A live front-image request was verified against its printed card name; image availability is not guaranteed, and unavailable art leaves the original rules readable.
 
+The complete local snapshot as of **2026-11-15** contains **5,510 gameplay cards / 9,444 eligible source printing records**, with an inclusive release window of **2025-11-15–2026-11-15**. All 5,510 cards have validated Luna Low output against one 16-category MTG vocabulary. Double-faced cards retain both original faces; Eerie Interlude, Command Tower and Steam Vents each retain one gameplay face despite alternate source printings.
+
+Model-output validation is structural, not a proof of rules accuracy. A concrete observed error: the generated analysis labels Eerie Interlude as graveyard recursion and gives its delayed return effect a `card-in-graveyard` target, although its original text returns the cards it exiled. Its source text and summary remain correct and visible. Such labels can distort neighbors; do not interpret categories, effects or scores as rulings or coverage guarantees. No handwritten per-card exception conceals this limitation.
+
 ## Riftbound: registered public release
 
 The documented [Riot Riftbound Content API](https://developer.riotgames.com/api-details/riftbound-content-v1) requires an API key:

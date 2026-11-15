@@ -746,9 +746,10 @@ function About({
 			</p>
 			<p>
 				Analysis is prepared with Codex{" "}
-				<strong>gpt-6-luna · low reasoning</strong>. Model descriptions can be
-				wrong. Similarity is not interchangeability or a guarantee of full rules
-				coverage. Use original English rules and official rulings for play.
+				<strong>gpt-6-luna · low reasoning</strong>. Model summaries and
+				mechanic labels can be wrong. Similarity is not interchangeability or a
+				guarantee of full rules coverage. Use original English rules and
+				official rulings for play.
 			</p>
 			{localSources.length > 0 && (
 				<section className="a-warning">
