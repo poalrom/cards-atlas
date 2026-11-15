@@ -18,6 +18,8 @@ export interface Printing {
 	releasedAt?: string;
 	sourceUrl?: string;
 	image?: string;
+	face?: CardFace;
+	tags?: string[];
 }
 
 export interface CatalogCard {

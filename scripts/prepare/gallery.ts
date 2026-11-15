@@ -4,6 +4,7 @@ import type {
 	CatalogCard,
 	SourceInfo,
 } from "../../src/entities/catalog/types.ts";
+import { mergeRiftboundPrintings } from "./riftbound.ts";
 import {
 	array,
 	atomicJson,
@@ -357,6 +358,16 @@ export async function importGallery(
 			number,
 			sourceUrl: "https://playriftbound.com/en-us/card-gallery/",
 			image: imageUrl,
+			face: {
+				name,
+				type,
+				text: rules,
+				cost,
+				image: imageUrl,
+				artist,
+				attributes,
+			},
+			tags,
 		};
 		const existing = cards.get(identity);
 		if (existing) existing.printings.push(printing);
@@ -393,7 +404,7 @@ export async function importGallery(
 		game: "riftbound",
 		asOf,
 		sources: [setList.source, cardList.source],
-		cards: [...cards.values()].sort((a, b) => a.id.localeCompare(b.id)),
+		cards: mergeRiftboundPrintings([...cards.values()]),
 	};
 	english(catalog, "official English gallery catalog");
 	await atomicJson(join(DATA, "catalogs", `riftbound.${asOf}.json`), catalog);

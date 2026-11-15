@@ -200,16 +200,23 @@ function wholeCatalogInventory(catalog: Catalog): unknown {
 		representativeCards: samples,
 	};
 }
-export async function taxonomyFor(
-	catalog: Catalog,
-	generation?: GenerationSession,
-): Promise<Taxonomy> {
+export function taxonomyRequest(catalog: Catalog): {
+	input: unknown;
+	identity: string;
+} {
 	const input = wholeCatalogInventory(catalog);
 	const identity = hash({
 		input,
 		prompt: hash(TAXONOMY_PROMPT),
 		model: hash(MODEL),
 	});
+	return { input, identity };
+}
+export async function taxonomyFor(
+	catalog: Catalog,
+	generation?: GenerationSession,
+): Promise<Taxonomy> {
+	const { input, identity } = taxonomyRequest(catalog);
 	const path = join(
 		DATA,
 		"analysis",

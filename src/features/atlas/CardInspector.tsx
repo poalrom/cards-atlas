@@ -8,6 +8,41 @@ import type {
 } from "../../entities/catalog/types";
 import { CardText, featureName } from "./shared-ui";
 
+function FaceDetails({ face, game }: { face: CardFace; game: GameId }) {
+	return (
+		<section className="a-face" aria-label={face.name}>
+			<div className="a-face-heading">
+				<h3>{face.name}</h3>
+				{face.cost && (
+					<span className="a-cost">
+						<span className="sr-only">Cost: </span>
+						<CardText text={face.cost} game={game} />
+					</span>
+				)}
+			</div>
+			<p className="a-card-type">{face.type}</p>
+			<p className="a-rules">
+				{face.text ? (
+					<CardText text={face.text} game={game} />
+				) : (
+					"No printed rules text."
+				)}
+			</p>
+			{face.attributes && Object.keys(face.attributes).length > 0 && (
+				<dl className="a-attributes">
+					{Object.entries(face.attributes).map(([name, value]) => (
+						<div key={name}>
+							<dt>{featureName(name)}</dt>
+							<dd>{value}</dd>
+						</div>
+					))}
+				</dl>
+			)}
+			{face.artist && <p className="a-muted">Illustration: {face.artist}</p>}
+		</section>
+	);
+}
+
 export function OriginalFaces({
 	card,
 	game,
@@ -22,43 +57,12 @@ export function OriginalFaces({
 	return (
 		<div className="a-original-faces">
 			{faces.map((face, index) => (
-				<section
-					className="a-face"
+				<FaceDetails
 					// biome-ignore lint/suspicious/noArrayIndexKey: Faces retain source order within an immutable card snapshot.
 					key={`${index}-${face.name}`}
-					aria-label={face.name}
-				>
-					<div className="a-face-heading">
-						<h3>{face.name}</h3>
-						{face.cost && (
-							<span className="a-cost">
-								<span className="sr-only">Cost: </span>
-								<CardText text={face.cost} game={game} />
-							</span>
-						)}
-					</div>
-					<p className="a-card-type">{face.type}</p>
-					<p className="a-rules">
-						{face.text ? (
-							<CardText text={face.text} game={game} />
-						) : (
-							"No printed rules text."
-						)}
-					</p>
-					{face.attributes && Object.keys(face.attributes).length > 0 && (
-						<dl className="a-attributes">
-							{Object.entries(face.attributes).map(([name, value]) => (
-								<div key={name}>
-									<dt>{featureName(name)}</dt>
-									<dd>{value}</dd>
-								</div>
-							))}
-						</dl>
-					)}
-					{face.artist && (
-						<p className="a-muted">Illustration: {face.artist}</p>
-					)}
-				</section>
+					face={face}
+					game={game}
+				/>
 			))}
 			{cardAttributes.length > 0 && (
 				<dl className="a-attributes">
@@ -225,6 +229,13 @@ export function CardInspector({
 								/>
 							))}
 						<div className="a-rules-label">ORIGINAL ENGLISH TEXT</div>
+						{card.printings.length > 1 &&
+							card.printings.some((printing) => printing.face) && (
+								<p className="a-muted">
+									Representative source printing. Text and tags may vary; expand
+									Printings below to read each original version.
+								</p>
+							)}
 						<OriginalFaces card={card} game={game} />
 						<div className="a-rules-label">MODEL SUMMARY</div>
 						<p>
@@ -365,6 +376,14 @@ export function CardInspector({
 										<dt>Printing ID</dt>
 										<dd>{printing.id}</dd>
 									</dl>
+									{printing.face && (
+										<FaceDetails face={printing.face} game={game} />
+									)}
+									{!!printing.tags?.length && (
+										<p className="a-card-tags">
+											<strong>Tags:</strong> {printing.tags.join(" · ")}
+										</p>
+									)}
 									{printing.sourceUrl && (
 										<a
 											href={printing.sourceUrl}

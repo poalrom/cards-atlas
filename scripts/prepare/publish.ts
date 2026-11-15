@@ -10,7 +10,7 @@ import type {
 import type { Taxonomy } from "./analysis.ts";
 import { MODEL } from "./codex.ts";
 import { LAYOUT, semanticAtlas } from "./semantic.ts";
-import { atomicJson, DATA, exists, hash, json } from "./storage.ts";
+import { atomicJson, DATA, exists, hash, json, object } from "./storage.ts";
 import { validateManifest, validateSnapshot } from "./validate.ts";
 
 export const UNAVAILABLE: AtlasManifest = {
@@ -60,7 +60,9 @@ export async function publishSnapshot(
 	const path = join(directory, filename);
 	await mkdir(directory, { recursive: true });
 	if (await exists(path)) {
-		const previous = validateSnapshot(await json(path));
+		const previous = object(await json(path), "immutable snapshot");
+		validateSnapshot(previous);
+		// Validation reconstructs objects; hash the stored content, not its reordered projection.
 		const {
 			id: previousId,
 			generatedAt: _generatedAt,

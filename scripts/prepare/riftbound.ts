@@ -17,6 +17,40 @@ import {
 
 export const RIOT_URL =
 	"https://americas.api.riotgames.com/riftbound/content/v1/contents";
+export function mergeRiftboundPrintings(cards: CatalogCard[]): CatalogCard[] {
+	const groups = new Map<string, CatalogCard>();
+	for (const card of cards) {
+		// Printed reminder text and omitted variant tags do not create a new card.
+		// Different types, domains, costs or stats remain separate gameplay versions.
+		const key = hash({
+			name: card.name,
+			type: card.type,
+			cost: card.cost,
+			colors: [...card.colors].sort(),
+			attributes: Object.entries(card.attributes ?? {}).sort(([a], [b]) =>
+				a.localeCompare(b),
+			),
+		});
+		const existing = groups.get(key);
+		const printings = existing?.printings ?? [];
+		printings.push(...card.printings);
+		if (
+			!existing ||
+			card.text.length > existing.text.length ||
+			(card.text.length === existing.text.length &&
+				((card.tags?.length ?? 0) > (existing.tags?.length ?? 0) ||
+					((card.tags?.length ?? 0) === (existing.tags?.length ?? 0) &&
+						card.id.localeCompare(existing.id) < 0)))
+		)
+			groups.set(key, { ...card, printings });
+	}
+	return [...groups.values()]
+		.map((card) => ({
+			...card,
+			printings: card.printings.sort((a, b) => a.id.localeCompare(b.id)),
+		}))
+		.sort((a, b) => a.id.localeCompare(b.id));
+}
 export function normalizeRiftbound(
 	value: unknown,
 	asOf: string,
@@ -96,7 +130,7 @@ export function normalizeRiftbound(
 			if (new URL(image).protocol !== "https:")
 				throw new Error("Riot art must use HTTPS");
 			const artist = text(art.artist, "artist", true);
-			// Include every official gameplay-bearing property; art/rarity/printing IDs never split identities.
+			// Preserve a content identity for each source version before grouping printings.
 			const gameplay = {
 				name,
 				type,
@@ -127,6 +161,8 @@ export function normalizeRiftbound(
 				number: String(record.collectorNumber),
 				sourceUrl: RIOT_URL,
 				image,
+				face: { name, type, text: rules, cost, image, artist, attributes },
+				tags,
 			};
 			const existing = groups.get(identity);
 			if (existing) existing.printings.push(printing);
@@ -168,7 +204,7 @@ export function normalizeRiftbound(
 				version: `${version}; sha256:${sourceHash}`,
 			},
 		],
-		cards: [...groups.values()].sort((a, b) => a.id.localeCompare(b.id)),
+		cards: mergeRiftboundPrintings([...groups.values()]),
 	};
 }
 export async function importRiftbound(

@@ -3,6 +3,7 @@ import type {
 	AtlasManifest,
 	AtlasSnapshot,
 	CardAnalysis,
+	CardFace,
 	Catalog,
 	CatalogCard,
 	ManifestGame,
@@ -59,6 +60,28 @@ function attributes(value: unknown): Record<string, string | number> {
 		result[key] = item;
 	}
 	return result;
+}
+function cardFace(value: unknown): CardFace {
+	const face = object(value, "face");
+	fields(
+		face,
+		["name", "type", "text", "cost"],
+		["image", "artist", "attributes"],
+		"face",
+	);
+	return {
+		name: text(face.name, "face name"),
+		type: text(face.type, "face type"),
+		text: text(face.text, "face rules", true),
+		cost: text(face.cost, "face cost", true),
+		...(face.image === undefined ? {} : { image: sourceUrl(face.image) }),
+		...(face.artist === undefined
+			? {}
+			: { artist: text(face.artist, "artist", true) }),
+		...(face.attributes === undefined
+			? {}
+			: { attributes: attributes(face.attributes) }),
+	};
 }
 export function validateCatalog(value: unknown): Catalog {
 	const root = object(value, "catalog");
@@ -117,34 +140,13 @@ export function validateCatalog(value: unknown): Catalog {
 		if (!id.startsWith(`${root.game}:`) || identities.has(id))
 			throw new Error("Duplicate/foreign card identity");
 		identities.add(id);
-		const faces = array(card.faces, "faces").map((value) => {
-			const face = object(value, "face");
-			fields(
-				face,
-				["name", "type", "text", "cost"],
-				["image", "artist", "attributes"],
-				"face",
-			);
-			return {
-				name: text(face.name, "face name"),
-				type: text(face.type, "face type"),
-				text: text(face.text, "face rules", true),
-				cost: text(face.cost, "face cost", true),
-				...(face.image === undefined ? {} : { image: sourceUrl(face.image) }),
-				...(face.artist === undefined
-					? {}
-					: { artist: text(face.artist, "artist", true) }),
-				...(face.attributes === undefined
-					? {}
-					: { attributes: attributes(face.attributes) }),
-			};
-		});
+		const faces = array(card.faces, "faces").map(cardFace);
 		const records = array(card.printings, "printings").map((value) => {
 			const printing = object(value, "printing");
 			fields(
 				printing,
 				["id", "setCode", "setName", "number"],
-				["releasedAt", "sourceUrl", "image"],
+				["releasedAt", "sourceUrl", "image", "face", "tags"],
 				"printing",
 			);
 			const printingId = text(printing.id, "printing ID");
@@ -174,6 +176,12 @@ export function validateCatalog(value: unknown): Catalog {
 				...(printing.image === undefined
 					? {}
 					: { image: sourceUrl(printing.image) }),
+				...(printing.face === undefined
+					? {}
+					: { face: cardFace(printing.face) }),
+				...(printing.tags === undefined
+					? {}
+					: { tags: strings(printing.tags, "printing tags") }),
 			};
 		});
 		if (!faces.length || !records.length)

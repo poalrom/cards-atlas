@@ -205,6 +205,53 @@ export function AtlasMap({
 			top: number;
 			bottom: number;
 		}[] = [];
+		for (const id of new Set([selected?.id, hovered])) {
+			const card = cards.find((candidate) => candidate.id === id);
+			const point = id ? positions.get(id) : undefined;
+			if (!card || !point) continue;
+			const halfWidth = ctx.measureText(card.name).width / 2 + 8;
+			const label = {
+				left: point.x - halfWidth,
+				right: point.x + halfWidth,
+				top: point.y + 14,
+				bottom: point.y + 40,
+			};
+			if (
+				id !== selected?.id &&
+				labels.some(
+					(other) =>
+						label.left < other.right &&
+						label.right > other.left &&
+						label.top < other.bottom &&
+						label.bottom > other.top,
+				)
+			)
+				continue;
+			labels.push(label, {
+				left: point.x - 22,
+				right: point.x + 22,
+				top: point.y - 22,
+				bottom: point.y + 22,
+			});
+			if (id === selected?.id) {
+				ctx.beginPath();
+				ctx.arc(point.x, point.y, 16, 0, Math.PI * 2);
+				ctx.fillStyle = surface;
+				ctx.fill();
+				ctx.strokeStyle = accent;
+				ctx.lineWidth = 2;
+				ctx.stroke();
+				ctx.beginPath();
+				ctx.arc(point.x, point.y, 8, 0, Math.PI * 2);
+				ctx.fillStyle = accent;
+				ctx.fill();
+				ctx.strokeStyle = background;
+				ctx.lineWidth = 5;
+			}
+			ctx.strokeText(card.name, point.x, point.y + 32);
+			ctx.fillStyle = accent;
+			ctx.fillText(card.name, point.x, point.y + 32);
+		}
 		for (const category of labelOrder) {
 			if (!category.count || (group && category.id !== group)) continue;
 			const x = origin.x + (category.x - center.x) * scale;
@@ -234,29 +281,6 @@ export function AtlasMap({
 			ctx.strokeText(category.name, x, y);
 			ctx.fillStyle = muted;
 			ctx.fillText(category.name, x, y);
-		}
-		for (const id of new Set([hovered, selected?.id])) {
-			const card = cards.find((candidate) => candidate.id === id);
-			const point = id ? positions.get(id) : undefined;
-			if (!card || !point) continue;
-			if (id === selected?.id) {
-				ctx.beginPath();
-				ctx.arc(point.x, point.y, 16, 0, Math.PI * 2);
-				ctx.fillStyle = surface;
-				ctx.fill();
-				ctx.strokeStyle = accent;
-				ctx.lineWidth = 2;
-				ctx.stroke();
-				ctx.beginPath();
-				ctx.arc(point.x, point.y, 8, 0, Math.PI * 2);
-				ctx.fillStyle = accent;
-				ctx.fill();
-				ctx.strokeStyle = background;
-				ctx.lineWidth = 5;
-			}
-			ctx.strokeText(card.name, point.x, point.y + 32);
-			ctx.fillStyle = accent;
-			ctx.fillText(card.name, point.x, point.y + 32);
 		}
 	}, [
 		cards,

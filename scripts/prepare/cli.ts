@@ -52,14 +52,15 @@ publishing API. It needs no key but is not app/API approval. Its sources carry l
 true, include official previews if supplied, and may only emit snapshots to .data/local-site/data.
 No community gallery or fixture fallback exists. Keys are never written to cache or logs.
 
-Before EVERY generation session: use your existing ChatGPT login (codex login), check
+Before generation: use your existing ChatGPT login (codex login), check
 https://chatgpt.com/codex/settings/usage, disable automatic credit purchase, ensure only
-included usage, then run preflight and pass a fresh explicit attestation:
+included usage, then run preflight and pass the explicit owner attestation:
 ${ATTESTATION}
 The CLI cannot enforce account billing or auto-purchase settings. It additionally reads
 account rate limits before EVERY inference and stops on unknown state, credits/unlimited
 balance, nonmatching normal-model quota, auth/quota failure, or >=75% used. No retries,
-other models, APIs, purchased credits or silent downgrade. Sessions expire after 4 hours.
+other models, APIs, purchased credits or silent downgrade. Preserve the actual billing
+verification timestamp when resuming; verify again if the account or billing settings change.
 Only gpt-6-luna with low reasoning, ephemeral read-only Codex and strict JSON is allowed.
 
 Example (PowerShell; only after completing the human usage check):

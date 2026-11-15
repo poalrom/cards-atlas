@@ -129,6 +129,8 @@ function parsePrinting(value: unknown): Printing {
 			printing.releasedAt === undefined ? undefined : date(printing.releasedAt),
 		sourceUrl: optionalUrl(printing.sourceUrl),
 		image: optionalUrl(printing.image),
+		face: printing.face === undefined ? undefined : parseFace(printing.face),
+		tags: printing.tags === undefined ? undefined : array(printing.tags, text),
 	};
 }
 function parseSource(value: unknown): SourceInfo {
