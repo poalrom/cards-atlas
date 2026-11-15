@@ -10,43 +10,33 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as PrototypeAtlasRouteImport } from './routes/prototype.atlas'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PrototypeAtlasRoute = PrototypeAtlasRouteImport.update({
-  id: '/prototype/atlas',
-  path: '/prototype/atlas',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/prototype/atlas': typeof PrototypeAtlasRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/prototype/atlas': typeof PrototypeAtlasRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/prototype/atlas': typeof PrototypeAtlasRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/prototype/atlas'
+  fullPaths: '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/prototype/atlas'
-  id: '__root__' | '/' | '/prototype/atlas'
+  to: '/'
+  id: '__root__' | '/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  PrototypeAtlasRoute: typeof PrototypeAtlasRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,19 +48,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/prototype/atlas': {
-      id: '/prototype/atlas'
-      path: '/prototype/atlas'
-      fullPath: '/prototype/atlas'
-      preLoaderRoute: typeof PrototypeAtlasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  PrototypeAtlasRoute: PrototypeAtlasRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,0 +1,51 @@
+{
+  "source": "https://api.scryfall.com/symbology",
+  "attribution": "Magic: The Gathering symbols © Wizards of the Coast; SVG assets distributed by Scryfall.",
+  "symbols": [
+    {
+      "symbol": "{1}",
+      "description": "one generic mana",
+      "source": "https://svgs.scryfall.io/card-symbols/1.svg"
+    },
+    {
+      "symbol": "{2}",
+      "description": "two generic mana",
+      "source": "https://svgs.scryfall.io/card-symbols/2.svg"
+    },
+    {
+      "symbol": "{W}",
+      "description": "one white mana",
+      "source": "https://svgs.scryfall.io/card-symbols/W.svg"
+    },
+    {
+      "symbol": "{U}",
+      "description": "one blue mana",
+      "source": "https://svgs.scryfall.io/card-symbols/U.svg"
+    },
+    {
+      "symbol": "{B}",
+      "description": "one black mana",
+      "source": "https://svgs.scryfall.io/card-symbols/B.svg"
+    },
+    {
+      "symbol": "{R}",
+      "description": "one red mana",
+      "source": "https://svgs.scryfall.io/card-symbols/R.svg"
+    },
+    {
+      "symbol": "{G}",
+      "description": "one green mana",
+      "source": "https://svgs.scryfall.io/card-symbols/G.svg"
+    },
+    {
+      "symbol": "{C}",
+      "description": "one colorless mana",
+      "source": "https://svgs.scryfall.io/card-symbols/C.svg"
+    },
+    {
+      "symbol": "{T}",
+      "description": "tap this permanent",
+      "source": "https://svgs.scryfall.io/card-symbols/T.svg"
+    }
+  ]
+}

@@ -1,8 +1,12 @@
 {
-  "scripts": {
-    "prototype": {
-      "type": "service",
-      "command": "npm run prototype"
-    }
-  }
+	"scripts": {
+		"dev": {
+			"type": "service",
+			"command": "npm run dev"
+		},
+		"local": {
+			"type": "service",
+			"command": "npm run dev:local"
+		}
+	}
 }
